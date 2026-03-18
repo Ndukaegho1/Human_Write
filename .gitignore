@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env.local
+.env.example
+humanwrite/.env
+npm-cache/
+*.log
+*.err
+tsconfig.tsbuildinfo
+node_modules
