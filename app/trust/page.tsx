@@ -98,7 +98,7 @@ const faqs = [
   },
   {
     question: "What are AI detector scores?",
-    answer: "Our AI detector provides probabilistic estimates—meaning it's a statistical prediction, not definitive proof. We clearly communicate this limitation and never claim our scores are 100% accurate. The scores should be used as one signal among many, not as conclusive evidence."
+    answer: "Our AI detector provides probabilistic estimates, meaning it is a statistical prediction, not definitive proof. We clearly communicate this limitation and never claim our scores are 100% accurate. The scores should be used as one signal among many, not as conclusive evidence."
   },
 ]
 
@@ -123,7 +123,7 @@ export default function TrustPage() {
               ))}
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors">Sign In</Link>
+              <Link href="/auth" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors">Sign In</Link>
               <Link href="/pricing" className="px-4 py-2 bg-[#0F4C81] text-white text-sm font-medium rounded-lg hover:bg-[#0a3d66] transition-colors">Get Started</Link>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function TrustPage() {
               <BrainIcon className="w-8 h-8 text-[#0F4C81] shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold text-[#0F172A]">Our Commitment to Responsible Use</h3>
-                <p className="text-[#475569] mt-2">HumanWrite is designed for legitimate writing enhancement—helping people communicate more clearly. We actively work to prevent misuse and reserve the right to suspend accounts that violate our terms of service.</p>
+                <p className="text-[#475569] mt-2">HumanWrite is designed for legitimate writing enhancement, helping people communicate more clearly. We actively work to prevent misuse and reserve the right to suspend accounts that violate our terms of service.</p>
               </div>
             </div>
           </div>

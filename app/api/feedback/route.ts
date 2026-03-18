@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { z } from "zod"
-import { getUserFromRequest } from "@/lib/auth"
+import { getUserFromRequest, hasPersistedUserId } from "@/lib/auth"
 import { getCollection } from "@/lib/db"
 
 const feedbackSchema = z.object({
@@ -15,6 +15,12 @@ const feedbackSchema = z.object({
 export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) {
+    return NextResponse.json(
+      { error: "Profile sync is still pending. Check Firebase and MongoDB configuration." },
+      { status: 503 }
+    )
+  }
 
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })

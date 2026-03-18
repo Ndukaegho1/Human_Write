@@ -1,15 +1,20 @@
 import { NextRequest } from "next/server"
 import { ObjectId } from "mongodb"
+import type { DecodedIdToken } from "firebase-admin/auth"
 import { firebaseAdminAuth } from "@/lib/firebase/server"
 import { getCollection } from "@/lib/db"
 import { UserDoc } from "@/models/collections"
 
-type DecodedFirebaseToken = Awaited<ReturnType<typeof firebaseAdminAuth.verifyIdToken>>
+type DecodedFirebaseToken = DecodedIdToken
 
-export type AuthUser = UserDoc & {
+export type AuthUser = Omit<UserDoc, "_id"> & {
   _id?: ObjectId
   syncDeferred?: boolean
   syncError?: string
+}
+
+export type PersistedAuthUser = AuthUser & {
+  _id: ObjectId
 }
 
 function extractNameParts(decoded: DecodedFirebaseToken) {
@@ -36,6 +41,7 @@ function extractNameParts(decoded: DecodedFirebaseToken) {
 export async function verifyFirebaseUserFromRequest(req: NextRequest): Promise<DecodedFirebaseToken | null> {
   const authorization = req.headers.get("authorization")
   if (!authorization?.startsWith("Bearer ")) return null
+  if (!firebaseAdminAuth) return null
 
   const token = authorization.substring("Bearer ".length)
   try {
@@ -120,8 +126,18 @@ export async function syncUserFromToken(decoded: DecodedFirebaseToken): Promise<
   }
 }
 
+export function hasPersistedUserId(user: AuthUser | null): user is PersistedAuthUser {
+  return Boolean(user?._id)
+}
+
 export async function getUserFromRequest(req: NextRequest) {
   const decoded = await verifyFirebaseUserFromRequest(req)
   if (!decoded) return null
-  return syncUserFromToken(decoded)
+  try {
+    return await syncUserFromToken(decoded)
+  } catch (error) {
+    const fallbackUser = buildFallbackUserFromToken(decoded)
+    fallbackUser.syncError = error instanceof Error ? error.message : "Profile sync failed"
+    return fallbackUser
+  }
 }

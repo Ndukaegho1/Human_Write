@@ -1,6 +1,6 @@
 import { initializeApp, cert, getApps, AppOptions } from "firebase-admin/app"
-import { getAuth } from "firebase-admin/auth"
-import { env } from "@/lib/env"
+import { getAuth, type Auth } from "firebase-admin/auth"
+import { env, hasFirebaseAdminConfig } from "@/lib/env"
 
 function normalizePrivateKey(key: string) {
   return key.replace(/\\n/g, "\n")
@@ -16,8 +16,13 @@ function buildAppOptions(): AppOptions {
   }
 }
 
-if (!getApps().length) {
-  initializeApp(buildAppOptions())
+let firebaseAdminAuth: Auth | null = null
+
+if (hasFirebaseAdminConfig) {
+  if (!getApps().length) {
+    initializeApp(buildAppOptions())
+  }
+  firebaseAdminAuth = getAuth()
 }
 
-export const firebaseAdminAuth = getAuth()
+export { firebaseAdminAuth }

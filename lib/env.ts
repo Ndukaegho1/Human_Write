@@ -1,13 +1,13 @@
 import { z } from "zod"
 
 const schema = z.object({
-  MONGODB_URI: z.string().min(1),
-  FIREBASE_PROJECT_ID: z.string().min(1),
-  FIREBASE_CLIENT_EMAIL: z.string().min(1),
-  FIREBASE_PRIVATE_KEY: z.string().min(1),
-  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1),
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1),
+  MONGODB_URI: z.string().default(""),
+  FIREBASE_PROJECT_ID: z.string().default(""),
+  FIREBASE_CLIENT_EMAIL: z.string().default(""),
+  FIREBASE_PRIVATE_KEY: z.string().default(""),
+  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().default(""),
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().default(""),
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().default(""),
   OPENAI_API_KEY: z.string().default(""),
   PAYSTACK_SECRET_KEY: z.string().default(""),
   PAYSTACK_WEBHOOK_SECRET: z.string().default(""),
@@ -19,3 +19,7 @@ const schema = z.object({
 })
 
 export const env = schema.parse(process.env)
+export const hasMongoConfig = Boolean(env.MONGODB_URI)
+export const hasFirebaseAdminConfig = Boolean(
+  env.FIREBASE_PROJECT_ID && env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY
+)

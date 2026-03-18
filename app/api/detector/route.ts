@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { detectorSchema } from "@/lib/validators"
-import { getUserFromRequest } from "@/lib/auth"
+import { getUserFromRequest, hasPersistedUserId } from "@/lib/auth"
 import { getCollection } from "@/lib/db"
 import { computeDetectionScore } from "@/lib/scoring/detector"
 import { clamp } from "@/lib/utils"
@@ -93,12 +93,26 @@ function mapPythonDetectionToLegacy(response: PythonDetectResponse, fallback: He
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getUserFromRequest(req)
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const parsed = detectorSchema.safeParse(await req.json())
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const authUser = await getUserFromRequest(req)
+  const user = hasPersistedUserId(authUser) ? authUser : null
+  const heuristic = await computeDetectionScore(parsed.data.text)
+  const python = await callPythonDetect({ text: parsed.data.text })
+  const result = python.ok ? mapPythonDetectionToLegacy(python.data, heuristic) : heuristic
+  const pipelineSource = python.ok ? "python_service" : "heuristic"
+
+  if (!user) {
+    return NextResponse.json({
+      requestId: new ObjectId().toString(),
+      ...result,
+      guestMode: true,
+      pipeline: pipelineSource,
+      detectorHints: python.ok ? ["python scorer used"] : ["guest mode"],
+    })
   }
 
   // Daily window is used here to avoid burst abuse and keep costs predictable.
@@ -109,12 +123,6 @@ export async function POST(req: NextRequest) {
   const requestId = new ObjectId()
 
   try {
-    const heuristic = await computeDetectionScore(parsed.data.text)
-    const python = await callPythonDetect({ text: parsed.data.text })
-
-    const result = python.ok ? mapPythonDetectionToLegacy(python.data, heuristic) : heuristic
-    const pipelineSource = python.ok ? "python_service" : "heuristic"
-
     const collection = await getCollection<DetectorRequestDoc>("detector_requests")
     await collection.insertOne({
       _id: requestId,
@@ -167,4 +175,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Detection failed" }, { status: 500 })
   }
 }
-

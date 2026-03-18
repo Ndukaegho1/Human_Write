@@ -415,36 +415,38 @@ export function NavBar() {
     document.documentElement.classList.toggle("dark", savedDark)
     document.documentElement.lang = savedLanguage
 
-    const unsubscribe = onAuthStateChanged(firebaseClientAuth, (user) => {
-      setUserEmail(user?.email || null)
-      setDisplayName(user?.displayName || null)
-      setAvatarUrl(user?.photoURL || null)
+    const unsubscribe = firebaseClientAuth
+      ? onAuthStateChanged(firebaseClientAuth, (user) => {
+          setUserEmail(user?.email || null)
+          setDisplayName(user?.displayName || null)
+          setAvatarUrl(user?.photoURL || null)
 
-      if (!user) {
-        localStorage.removeItem("hw-profile-cache")
-        return
-      }
-
-      user
-        .getIdToken()
-        .then(async (token) => {
-          const response = await fetch("/api/auth/sync", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          }).catch(() => null)
-          const data = await response?.json().catch(() => null)
-          const profile = {
-            email: data?.user?.email || user.email || null,
-            displayName: data?.user?.display_name || user.displayName || null,
-            avatarUrl: data?.user?.avatar_url || user.photoURL || null,
+          if (!user) {
+            localStorage.removeItem("hw-profile-cache")
+            return
           }
-          setUserEmail(profile.email)
-          setDisplayName(profile.displayName)
-          setAvatarUrl(profile.avatarUrl)
-          localStorage.setItem("hw-profile-cache", JSON.stringify(profile))
+
+          user
+            .getIdToken()
+            .then(async (token) => {
+              const response = await fetch("/api/auth/sync", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+              }).catch(() => null)
+              const data = await response?.json().catch(() => null)
+              const profile = {
+                email: data?.user?.email || user.email || null,
+                displayName: data?.user?.display_name || user.displayName || null,
+                avatarUrl: data?.user?.avatar_url || user.photoURL || null,
+              }
+              setUserEmail(profile.email)
+              setDisplayName(profile.displayName)
+              setAvatarUrl(profile.avatarUrl)
+              localStorage.setItem("hw-profile-cache", JSON.stringify(profile))
+            })
+            .catch(() => null)
         })
-        .catch(() => null)
-    })
+      : () => undefined
 
     const cached = localStorage.getItem("hw-profile-cache")
     if (cached) {
@@ -497,7 +499,9 @@ export function NavBar() {
   }
 
   const handleLogout = async () => {
-    await signOut(firebaseClientAuth).catch(() => null)
+    if (firebaseClientAuth) {
+      await signOut(firebaseClientAuth).catch(() => null)
+    }
     localStorage.removeItem("hw-profile-cache")
     setProfileOpen(false)
     router.push("/auth")

@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
-import { getUserFromRequest } from "@/lib/auth"
+import { getUserFromRequest, hasPersistedUserId } from "@/lib/auth"
 import { getCollection } from "@/lib/db"
 import { voiceProfileSchema } from "@/lib/validators"
 import { z } from "zod"
 
+const PROFILE_SYNC_ERROR = "Profile sync is still pending. Check Firebase and MongoDB configuration."
+
 export async function GET(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
   const collection = await getCollection("voice_profiles")
   const profile = await collection.findOne({ firebase_uid: user.firebase_uid })
   const defaults = {
@@ -34,6 +37,7 @@ function sanitizeUpdate(body: unknown) {
 export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
   const parsed = voiceProfileSchema.safeParse(await req.json())
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 })
@@ -57,6 +61,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
 
   let body: unknown
   try {
@@ -78,6 +83,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
   const collection = await getCollection("voice_profiles")
   await collection.deleteOne({ firebase_uid: user.firebase_uid })
   return NextResponse.json({ ok: true })

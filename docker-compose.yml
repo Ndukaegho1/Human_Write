@@ -7,8 +7,8 @@
     ports:
       - "8000:8000"
     env_file:
-      - ./humanwrite/.env
       - ./humanwrite/.env.example
+      - ./humanwrite/.env
     restart: unless-stopped
 
   humanwrite-web:
@@ -21,8 +21,8 @@
     ports:
       - "3000:3000"
     env_file:
-      - .env.local
       - .env.example
+      - .env.local
     environment:
       PYTHON_SCORER_URL: "http://humanwrite-api:8000/api"
       APP_URL: "http://localhost:3000"

@@ -18,6 +18,16 @@ app = FastAPI(
   version="1.0.0",
 )
 
+
+@app.get("/")
+def root() -> dict[str, str]:
+  return {
+    "status": "ok",
+    "service": "HumanWrite AI Service",
+    "health": "/api/health",
+    "docs": "/docs",
+  }
+
 app.add_middleware(
   CORSMiddleware,
   allow_origins=settings.cors_origins,

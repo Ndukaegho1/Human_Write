@@ -101,7 +101,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                href="/login"
+                href="/auth"
                 className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors"
               >
                 Sign In
@@ -139,14 +139,14 @@ export default function AboutPage() {
               <p className="text-[#475569] leading-relaxed mb-6">
                 At HumanWrite, we're on a mission to make writing more human. We believe 
                 everyone deserves tools that help them express themselves more clearly and 
-                authentically—whether they're crafting a business proposal, writing academic 
+                authentically, whether they're crafting a business proposal, writing academic 
                 content, or communicating with customers.
               </p>
               <p className="text-[#475569] leading-relaxed">
                 Our platform doesn't aim to replace human creativity. Instead, we help 
                 writers refine their voice, remove awkward phrasing, and communicate with 
-                confidence. We call this "human-centered AI"—technology that serves people, 
-                not the other way around.
+                confidence. We call this "human-centered AI." It is technology that serves 
+                people, not the other way around.
               </p>
             </div>
             <div className="bg-[#F8FAFC] rounded-2xl p-8 border border-[#E2E8F0]">
@@ -189,7 +189,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-lg font-semibold text-[#0F172A] mb-2">Enhance, Don't Replace</h3>
               <p className="text-[#475569] text-sm">
-                Our tools help you improve your writing—not generate it for you. 
+                Our tools help you improve your writing, not generate it for you. 
                 You maintain full control and ownership of your content.
               </p>
             </Card>
@@ -328,7 +328,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-semibold text-[#0F172A] mb-2">We Don't Support Deception</h3>
                 <p className="text-[#475569] text-sm">
-                  HumanWrite is designed for legitimate writing enhancement—helping people communicate 
+                  HumanWrite is designed for legitimate writing enhancement, helping people communicate 
                   more clearly, not helping anyone mislead others. We actively work to prevent misuse 
                   of our platform.
                 </p>

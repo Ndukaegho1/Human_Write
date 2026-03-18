@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { writingSampleSchema } from "@/lib/validators"
-import { getUserFromRequest } from "@/lib/auth"
+import { getUserFromRequest, hasPersistedUserId } from "@/lib/auth"
 import { getCollection } from "@/lib/db"
 import { createEmbedding } from "@/lib/services/embeddings"
 import { checkUsageLimit } from "@/lib/rateLimit"
 
+const PROFILE_SYNC_ERROR = "Profile sync is still pending. Check Firebase and MongoDB configuration."
+
 export async function GET(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
   const url = new URL(req.url)
   const limit = Math.min(Number(url.searchParams.get("limit") ?? "25"), 100)
   const samples = await (await getCollection("writing_samples"))
@@ -25,6 +28,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req)
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!hasPersistedUserId(user)) return NextResponse.json({ error: PROFILE_SYNC_ERROR }, { status: 503 })
 
   const limit = await checkUsageLimit(user.firebase_uid, "rewrite", user.plan, "monthly")
   if (!limit.ok) {

@@ -228,7 +228,7 @@ export default function SettingsPage() {
   }[language]
 
   useEffect(() => {
-    const user = firebaseClientAuth.currentUser
+    const user = firebaseClientAuth?.currentUser
     if (user?.email) setEmail(user.email)
     if (user?.displayName) {
       setDisplayName(user.displayName)
@@ -275,6 +275,7 @@ export default function SettingsPage() {
     setSaving(true)
     setMessage(null)
     try {
+      if (!firebaseClientAuth) throw new Error("Firebase auth is not configured for this environment.")
       const token = await firebaseClientAuth.currentUser?.getIdToken()
       if (!token) throw new Error(copy.loginAgain)
 
@@ -347,6 +348,10 @@ export default function SettingsPage() {
   }
 
   const startPasswordSetup = async () => {
+    if (!firebaseClientAuth) {
+      setMessage("Firebase auth is not configured for this environment.")
+      return
+    }
     if (!email.trim()) {
       setMessage(copy.loginAgain)
       return

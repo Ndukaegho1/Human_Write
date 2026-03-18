@@ -188,7 +188,7 @@ export default function AdminPage() {
   })
 
   const getAdminHeaders = async (): Promise<Record<string, string> | null> => {
-    if (!firebaseClientAuth.currentUser) return null
+    if (!firebaseClientAuth?.currentUser) return null
     const token = await firebaseClientAuth.currentUser.getIdToken()
     return {
       Authorization: `Bearer ${token}`,

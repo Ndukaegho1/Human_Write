@@ -54,8 +54,11 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const authUnavailable = !firebaseClientAuth
+  const googleUnavailable = !firebaseClientAuth || !googleProvider
 
   const syncUser = async () => {
+    if (!firebaseClientAuth) throw new Error("Firebase auth is not configured for this environment.")
     const token = await firebaseClientAuth.currentUser?.getIdToken()
     if (!token) throw new Error("Missing auth token. Please login again.")
     const response = await fetch("/api/auth/sync", {
@@ -80,12 +83,16 @@ export function AuthForm() {
     router.push("/dashboard")
   }
 
-  const withProvider = async (provider: typeof googleProvider) => {
+  const withProvider = async () => {
+    if (!firebaseClientAuth || !googleProvider) {
+      setError("Google sign-in is unavailable until Firebase web credentials are configured.")
+      return
+    }
     setLoading(true)
     setError(null)
     setSuccess(null)
     try {
-      await signInWithPopup(firebaseClientAuth, provider)
+      await signInWithPopup(firebaseClientAuth, googleProvider)
       await finishAuth()
     } catch (err) {
       setError((err as Error).message || "OAuth failed.")
@@ -96,6 +103,10 @@ export function AuthForm() {
 
   const submitEmail = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!firebaseClientAuth) {
+      setError("Email login is unavailable until Firebase web credentials are configured.")
+      return
+    }
     if (mode === "signup" && (!firstName.trim() || !lastName.trim())) {
       setError("First name and last name are required.")
       return
@@ -128,6 +139,10 @@ export function AuthForm() {
   }
 
   const handleForgotPassword = async () => {
+    if (!firebaseClientAuth) {
+      setError("Password reset is unavailable until Firebase web credentials are configured.")
+      return
+    }
     if (!email.trim()) {
       setError("Enter your email address first, then click Forgot password.")
       return
@@ -218,7 +233,7 @@ export function AuthForm() {
             </button>
           </div>
         ) : null}
-        <Button type="submit" disabled={loading} className="w-full">
+      <Button type="submit" disabled={loading} className="w-full">
           <span className="inline-flex items-center gap-2">
             <MailIcon />
             {loading ? "Working..." : mode === "signup" ? "Create account with Email" : "Continue with Email"}
@@ -233,12 +248,13 @@ export function AuthForm() {
         </span>
       </div>
 
-      <Button type="button" variant="ghost" disabled={loading} onClick={() => withProvider(googleProvider)} className="w-full">
+      <Button type="button" variant="ghost" disabled={loading || googleUnavailable} onClick={withProvider} className="w-full">
         <span className="inline-flex items-center gap-2">
           <GoogleIcon />
           Continue with Google
         </span>
       </Button>
+      {authUnavailable ? <p className="text-sm text-amber-200">Firebase sign-in is disabled until valid web auth credentials are configured.</p> : null}
       {error ? <p className="text-sm text-rose-200">{error}</p> : null}
       {success ? <p className="text-sm text-emerald-200">{success}</p> : null}
     </div>

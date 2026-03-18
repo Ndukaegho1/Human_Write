@@ -118,7 +118,7 @@ export default function ResourcesPage() {
               ))}
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors">Sign In</Link>
+              <Link href="/auth" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors">Sign In</Link>
               <Link href="/pricing" className="px-4 py-2 bg-[#0F4C81] text-white text-sm font-medium rounded-lg hover:bg-[#0a3d66] transition-colors">Get Started</Link>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function ResourcesPage() {
             </div>
           </div>
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">© 2024 HumanWrite. All rights reserved.</p>
+            <p className="text-sm text-gray-400">(c) 2024 HumanWrite. All rights reserved.</p>
             <div className="flex gap-4 text-sm text-gray-400">
               <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>

@@ -1,6 +1,6 @@
 ﻿# HumanWrite API (FastAPI)
 
-This backend service powers the AI Humanizer and AI Detector for the Next.js frontend.
+This backend service powers the AI Humanizer and AI Detector for the Next.js frontend. In the full app, the Next.js layer calls this service through `PYTHON_SCORER_URL`.
 
 ## Features
 
@@ -64,10 +64,17 @@ humanwrite/
    pip install -r requirements.txt
    ```
 
-3. Copy environment file
+3. Create `humanwrite/.env`
 
    ```bash
-   cp .env.example .env
+   OPENAI_API_KEY=
+   OPENAI_MODEL=gpt-4o-mini
+   OPENAI_TIMEOUT_SECONDS=30
+   OPENAI_MAX_TOKENS=1200
+   APP_HOST=0.0.0.0
+   APP_PORT=8000
+   ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+   APP_ENV=development
    ```
 
 4. Set your OpenAI key in `.env`
@@ -136,4 +143,5 @@ curl -X POST http://127.0.0.1:8000/api/humanize-and-detect \
 - Detector scoring is heuristic and probabilistic, not a deterministic truth claim.
 - The API returns JSON with explicit `success` flags and structured error responses.
 - OpenAI key is consumed via `OPENAI_API_KEY` in config and automatically passed to OpenAI service.
+- The full-stack compose setup expects a real `humanwrite/.env`; this repo does not currently rely on a tracked backend env template.
 - Humanizer uses `app/services/openai_service.py`, with errors surfaced as clean 502/503 responses.

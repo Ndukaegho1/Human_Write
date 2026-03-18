@@ -1,11 +1,14 @@
 import { MongoClient, Db, Collection, Document } from "mongodb"
-import { env } from "@/lib/env"
+import { env, hasMongoConfig } from "@/lib/env"
 
 const globalForMongo = globalThis as unknown as { _mongoClient?: MongoClient }
 
 let client: MongoClient | null = globalForMongo._mongoClient ?? null
 
 async function getClient(): Promise<MongoClient> {
+  if (!hasMongoConfig) {
+    throw new Error("MONGODB_URI is missing")
+  }
   if (client) return client
 
   client = new MongoClient(env.MONGODB_URI)
